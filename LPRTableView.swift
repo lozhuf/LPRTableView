@@ -199,9 +199,11 @@ extension LPRTableView {
 				if let previousGestureVerticalPosition = self.previousGestureVerticalPosition {
 					if location.y != previousGestureVerticalPosition {
 						longPressReorderDelegate?.tableView?(self, draggingGestureChanged: gesture)
+						self.previousGestureVerticalPosition = location.y
 					}
 				} else {
 					longPressReorderDelegate?.tableView?(self, draggingGestureChanged: gesture)
+					self.previousGestureVerticalPosition = location.y
 				}
 			}
 			
