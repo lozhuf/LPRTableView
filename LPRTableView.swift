@@ -46,6 +46,8 @@ open class LPRTableView: UITableView {
 	fileprivate var scrollDisplayLink: CADisplayLink?
 	
 	fileprivate var feedbackGenerator: AnyObject?
+
+	fileprivate var previousGestureVerticalPosition: CGFloat?
 	
 	/** A Bool property that indicates whether long press to reorder is enabled. */
 	open var longPressReorderEnabled: Bool {
@@ -93,8 +95,6 @@ open class LPRTableView: UITableView {
 }
 
 extension LPRTableView {
-
-	fileprivate var previousGestureVerticalPosition: CGFloat?
 	
 	fileprivate func canMoveRowAt(indexPath: IndexPath) -> Bool {
 		return (dataSource?.responds(to: #selector(UITableViewDataSource.tableView(_:canMoveRowAt:))) == false) || (dataSource?.tableView?(self, canMoveRowAt: indexPath) == true)
