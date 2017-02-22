@@ -23,7 +23,7 @@ public protocol LPRTableViewDelegate: NSObjectProtocol {
 	/** Called within an animation block when the dragging view is about to hide. */
 	@objc optional func tableView(_ tableView: UITableView, hideDraggingView view: UIView, at indexPath: IndexPath)
 
-	/** Called when the cell is dragged across the screen. Use this to get the gesture's information as its being executed. */
+	/** Called when the dragging gesture's vertical location changes. */
 	@objc optional func tableView(_ tableView: UITableView, draggingGestureChanged gesture: UILongPressGestureRecognizer)
 	
 }
@@ -93,6 +93,8 @@ open class LPRTableView: UITableView {
 }
 
 extension LPRTableView {
+
+	fileprivate var previousGestureVerticalPosition: CGFloat?
 	
 	fileprivate func canMoveRowAt(indexPath: IndexPath) -> Bool {
 		return (dataSource?.responds(to: #selector(UITableViewDataSource.tableView(_:canMoveRowAt:))) == false) || (dataSource?.tableView?(self, canMoveRowAt: indexPath) == true)
@@ -128,6 +130,7 @@ extension LPRTableView {
 		if gesture.state == .began {
 			self.hapticFeedbackSetup()
 			self.hapticFeedbackSelectionChanged()
+			self.previousGestureVerticalPosition = location.y
 			
 			if let indexPath = indexPath {
 				if var cell = cellForRow(at: indexPath) {
@@ -193,7 +196,13 @@ extension LPRTableView {
 				if (location.y >= 0.0) && (location.y <= contentSize.height + 50.0) {
 					draggingView.center = CGPoint(x: center.x, y: location.y)
 				}
-				longPressReorderDelegate?.tableView?(self, draggingGestureChanged: gesture)
+				if let previousGestureVerticalPosition = self.previousGestureVerticalPosition {
+					if location.y != previousGestureVerticalPosition {
+						longPressReorderDelegate?.tableView?(self, draggingGestureChanged: gesture)
+					}
+				} else {
+					longPressReorderDelegate?.tableView?(self, draggingGestureChanged: gesture)
+				}
 			}
 			
 			var rect = bounds
@@ -221,6 +230,9 @@ extension LPRTableView {
 		}
 		// Dropped.
 		else if gesture.state == .ended {
+
+			// Remove previously cached Gesture location
+			self.previousGestureVerticalPosition = nil
 			
 			// Remove scrolling CADisplayLink.
 			scrollDisplayLink?.invalidate()
@@ -260,6 +272,7 @@ extension LPRTableView {
 		}
 		else if gesture.state == .cancelled || gesture.state == .failed {
 			self.hapticFeedbackFinalize()
+			self.previousGestureVerticalPosition = nil
 		}
 	}
 	
