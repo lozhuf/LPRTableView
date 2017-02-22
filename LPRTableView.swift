@@ -22,6 +22,9 @@ public protocol LPRTableViewDelegate: NSObjectProtocol {
 	
 	/** Called within an animation block when the dragging view is about to hide. */
 	@objc optional func tableView(_ tableView: UITableView, hideDraggingView view: UIView, at indexPath: IndexPath)
+
+	/** Called when the cell is dragged across the screen. Use this to get the gesture's information as its being executed. */
+	@objc optional func tableView(_ tableView: UITableView, draggingGestureChanged gesture: UILongPressGestureRecognizer)
 	
 }
 
@@ -190,6 +193,7 @@ extension LPRTableView {
 				if (location.y >= 0.0) && (location.y <= contentSize.height + 50.0) {
 					draggingView.center = CGPoint(x: center.x, y: location.y)
 				}
+				longPressReorderDelegate?.tableView?(self, draggingGestureChanged: gesture)
 			}
 			
 			var rect = bounds
@@ -401,6 +405,10 @@ open class LPRTableViewController: UITableViewController, LPRTableViewDelegate {
 	
 	/** Called within an animation block when the dragging view is about to hide. The default implementation of this method is empty—no need to call `super`. */
 	open func tableView(_ tableView: UITableView, hideDraggingView view: UIView, at indexPath: IndexPath) {
+		// Empty implementation, just to simplify overriding (and to show up in code completion).
+	}
+
+	open func tableView(_ tableView: UITableView, draggingGestureChanged gesture: UILongPressGestureRecognizer) {
 		// Empty implementation, just to simplify overriding (and to show up in code completion).
 	}
 	
